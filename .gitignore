@@ -1,0 +1,29 @@
+# --- Docker & Volumes ---
+ollama_data/
+chroma_data/
+postgres_data/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+.env
+
+# --- Airflow ---
+logs/
+plugins/
+airflow.db
+standalone_admin_password.txt
+
+# --- Dados do Projeto ---
+data/*
+!data/.gitkeep
+
+# --- OS e IDE ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
