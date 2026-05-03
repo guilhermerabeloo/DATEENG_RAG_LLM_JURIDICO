@@ -49,3 +49,43 @@ services:
       - "8000:8000"
     volumes:
       - ./chroma_data:/chroma/chroma
+
+  # --- SPARK MASTER ---
+  spark-master:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    image: dataeng_rag_llm_juridico_spark
+    container_name: dataeng_rag_llm_juridico_spark_master
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "7077:7077"
+      - "8081:8081"
+    volumes:
+      - ./data:/opt/spark/data
+      - ./scripts:/opt/spark/scripts
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+      --host spark-master
+      --port 7077
+      --webui-port 8081
+
+  # --- SPARK WORKER ---
+  spark-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    image: dataeng_rag_llm_juridico_spark
+    container_name: dataeng_rag_llm_juridico_spark_worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    volumes:
+      - ./data:/opt/spark/data
+      - ./scripts:/opt/spark/scripts
+    depends_on:
+      - spark-master
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077
