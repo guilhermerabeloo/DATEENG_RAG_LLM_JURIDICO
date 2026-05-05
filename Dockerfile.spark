@@ -1,8 +1,17 @@
-FROM apache/spark:3.5.0
+# Usa a imagem oficial da Bitnami (já com Python 3.11 e SQLite moderno)
+FROM public.ecr.aws/bitnami/spark:3.5
 
+# Muda para root temporariamente para instalar pacotes
 USER root
 
+# Instala dependências básicas do SO para pacotes Python que precisem compilar C-extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copia e instala o requirements
 COPY requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
-USER spark
+# Retorna para o usuário padrão de segurança da Bitnami (UID 1001)
+USER 1001
