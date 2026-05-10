@@ -7,6 +7,8 @@ services:
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U airflow"]
       interval: 10s
@@ -24,13 +26,15 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=${AIRFLOW_UI_PWD}
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
     ports:
       - "8080:8080"
-    command: standalone
+    command: bash -c "airflow db migrate && airflow users create -u admin -p admin -f Admin -l User -r Admin -e admin@example.com || true && touch /opt/airflow/standalone_admin_password.txt && airflow standalone"
 
   # --- IA LOCAL (Ollama) ---
   ollama:
@@ -63,7 +67,6 @@ services:
       - "7077:7077"
       - "8081:8081"
     volumes:
-      # ATENÇÃO: Caminhos ajustados para o padrão da Bitnami
       - ./data:/opt/bitnami/spark/data
       - ./scripts:/opt/bitnami/spark/scripts
 
@@ -78,8 +81,10 @@ services:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
     volumes:
-      # ATENÇÃO: Caminhos ajustados para o padrão da Bitnami
       - ./data:/opt/bitnami/spark/data
       - ./scripts:/opt/bitnami/spark/scripts
     depends_on:
       - spark-master
+
+volumes:
+  postgres_data:
