@@ -5,15 +5,12 @@ from datetime import datetime
 
 spark = SparkSession.builder \
     .appName("RAG_LLM_JURIDICO_BRONZE") \
-    .config("spark.jars.packages", "io.delta:delta-spark_2.12:3.1.0") \
-    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("ERROR")
 
-RAW_PATH = "/opt/spark/data/pdf/"
-BRONZE_OUTPUT_PATH = "/opt/spark/data/delta/bronze/boate_kiss_files"
+RAW_PATH = "/opt/bitnami/spark/data/pdf/"
+BRONZE_OUTPUT_PATH = "/opt/bitnami/spark/data/delta/bronze/boate_kiss_files"
 
 def ingest_pdfs_to_bronze(input_path, output_path):
     """

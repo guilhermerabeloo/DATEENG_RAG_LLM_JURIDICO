@@ -17,7 +17,11 @@ services:
 
   # --- ORQUESTRADOR (Airflow) ---
   airflow:
-    image: apache/airflow:2.7.1-python3.10
+    # image: apache/airflow:2.7.1-python3.10
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    image: dataeng_rag_llm_juridico_airflow
     container_name: dataeng_rag_llm_juridico_airflow
     depends_on:
       postgres:
@@ -32,6 +36,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
+      - ./data:/opt/bitnami/spark/data
     ports:
       - "8080:8080"
     command: bash -c "airflow db migrate && airflow users create -u admin -p admin -f Admin -l User -r Admin -e admin@example.com || true && touch /opt/airflow/standalone_admin_password.txt && airflow standalone"

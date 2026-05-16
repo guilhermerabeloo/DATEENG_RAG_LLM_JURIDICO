@@ -21,6 +21,7 @@ standalone_admin_password.txt
 # --- Dados do Projeto ---
 data/*
 !data/.gitkeep
+PROGRESS.md
 
 # --- OS e IDE ---
 .vscode/

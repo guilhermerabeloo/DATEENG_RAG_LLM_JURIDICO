@@ -8,9 +8,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 spark = SparkSession.builder \
     .appName("RAG_LLM_JURIDICO_SILVER") \
-    .config("spark.jars.packages", "io.delta:delta-spark_2.12:3.1.0") \
-    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("ERROR")
@@ -82,9 +79,9 @@ def chunk_text(cleaned_text):
 # ====================
 
 # Extract
-df_bronze = spark.read.format("delta").load("/opt/spark/data/delta/bronze/boate_kiss_files")
+df_bronze = spark.read.format("delta").load("/opt/bitnami/spark/data/delta/bronze/boate_kiss_files")
 
-df_extracted = df_bronze.withColumn("raw_text", extract_pdf_text(F.col("content"))) \ 
+df_extracted = df_bronze.withColumn("raw_text", extract_pdf_text(F.col("content"))) \
                          .filter(F.col("raw_text").isNotNull())
 
 
@@ -109,5 +106,5 @@ df_silver = df_chunked.withColumn("chunk", F.explode(F.col("chunks"))) \
 df_silver.write \
     .format("delta") \
     .mode("overwrite") \
-    .save("/opt/spark/data/delta/silver/boate_kiss_refined")
+    .save("/opt/bitnami/spark/data/delta/silver/boate_kiss_refined")
 
