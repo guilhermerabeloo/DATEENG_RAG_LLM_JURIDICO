@@ -1,3 +1,4 @@
+import hashlib
 import requests
 import chromadb
 from pyspark.sql import SparkSession
@@ -48,8 +49,9 @@ def upsert_to_chroma(partition):
     collection = client.get_or_create_collection(name="boate_kiss_index")
     
     for row in partition:
-        # Gerar um ID único baseado no nome do arquivo e hash do texto ou timestamp
-        unique_id = f"{row['file_name']}_{hash(row['text'])}"
+        # ID determinístico: garante upsert correto entre execuções
+        text_hash = hashlib.md5(row['text'].encode('utf-8')).hexdigest()
+        unique_id = f"{row['file_name']}_{text_hash}"
         
         collection.upsert(
             ids=[unique_id],

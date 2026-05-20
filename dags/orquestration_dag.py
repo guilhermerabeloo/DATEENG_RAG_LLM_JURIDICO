@@ -46,12 +46,24 @@ def spark_dag():
             'spark.hadoop.fs.permissions.umask-mode': '000',
         },
     )
+    
+    spark_gold = SparkSubmitOperator(
+        task_id='spark_submit_gold',
+        application="/opt/airflow/scripts/spark_gold.py",
+        packages='io.delta:delta-spark_2.12:3.1.0',
+        conn_id='spark_standalone',
+        conf={
+            'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
+            'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
+            'spark.hadoop.fs.permissions.umask-mode': '000',
+        },
+    )
 
     end = EmptyOperator(task_id='end')
 
 
 
-    start >> spark_bronze >> spark_silver >> end
+    start >> spark_bronze >> spark_silver >> spark_gold >> end
 
 
 spark_dag()
